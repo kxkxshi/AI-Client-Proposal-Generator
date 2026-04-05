@@ -107,7 +107,7 @@ def verify_supabase_token(token: str) -> dict:
             token,
             key,
             algorithms=algorithms,
-            options={"verify_aud": False},
+            audience="authenticated",
         )
         user_id: str = payload.get("sub")
         if not user_id:
