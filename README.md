@@ -15,7 +15,6 @@ Generate professional, tailored proposals in under 30 seconds using Google Gemin
 | Auth | Supabase (JWT-based) |
 | AI | Google Gemini 1.5 Flash |
 | Frontend | React 18 · Vite · Tailwind CSS 3 |
-| HTTP Client | Axios |
 | PDF Export | jsPDF + html2canvas |
 
 ---
