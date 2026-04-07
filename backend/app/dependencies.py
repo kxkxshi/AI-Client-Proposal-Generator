@@ -20,7 +20,7 @@ def get_current_user(
 
 
 def get_current_user_id(
-    payload: dict = Depends(get_current_uuser),
+    payload: dict = Depends(get_current_user),
 ) -> str:
     """Returns only the user's UUID string (Supabase 'sub' claim)."""
     return payload["sub"]
