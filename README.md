@@ -6,7 +6,7 @@ Generate professional, tailored proposals in under 30 seconds using Google Gemin
 ---
 
 ## 🧠 Tech Stack
-
+ 
 | Layer | Technology |
 |---|---|
 | Backend | Python 3.11+ · FastAPI · Uvicorn |
