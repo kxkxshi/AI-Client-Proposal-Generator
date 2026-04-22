@@ -1,7 +1,7 @@
 # ProposeAI 🚀
 
 **AI-powered client proposal generator for freelancers and agencies.**  
-Generate professional, tailored proposals in under 30 seconds using Google Gemini AI.
+Generate professional, tailored proposals in under 30 seconds using OpenRouter AI.
 
 ---
 
@@ -13,7 +13,7 @@ Generate professional, tailored proposals in under 30 seconds using Google Gemin
 | ORM | SQLAlchemy 2.0 |
 | Database | PostgreSQL |
 | Auth | Supabase (JWT-based) |
-| AI | Google Gemini 1.5 Flash |
+| AI | OpenRouter |
 | Frontend | React 18 · Vite · Tailwind CSS 3 |
 | PDF Export | jsPDF + html2canvas |
 
@@ -38,7 +38,7 @@ AI Client Proposal Generator/
 │   │   ├── routers/
 │   │   │   └── proposals.py     ← API endpoints
 │   │   └── services/
-│   │       ├── gemini_service.py  ← AI integration
+│   │       ├── openrouter_service.py  ← AI integration
 │   │       └── proposal_service.py
 │   ├── .env                     ← ⚠️ Fill in your credentials
 │   └── requirements.txt
@@ -61,7 +61,7 @@ AI Client Proposal Generator/
 - **Python 3.11+** — [Download](https://python.org)
 - **Node.js 18+** — [Download](https://nodejs.org)
 - **PostgreSQL** — [Download](https://postgresql.org)
-- **Gemini API Key** — [Get free key](https://aistudio.google.com/app/apikey)
+- **OpenRouter API Key** — [Get key](https://openrouter.ai/keys)
 - **Supabase account** — [Sign up free](https://supabase.com) (for authentication)
 
 ---
@@ -86,7 +86,7 @@ CREATE DATABASE proposeai;
 Edit `backend/.env`:
 ```env
 DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/proposeai
-GEMINI_API_KEY=your-gemini-api-key
+OPENROUTER_API_KEY=your-openrouter-api-key
 SUPABASE_JWT_SECRET=your-supabase-jwt-secret
 ```
 
@@ -185,7 +185,7 @@ Click **Download PDF** on any proposal view page. The proposal content is captur
 |---|---|
 | `psycopg2` install fails | Install PostgreSQL dev headers or use `psycopg2-binary` (already in requirements) |
 | 401 Unauthorized from backend | Check `SUPABASE_JWT_SECRET` matches your Supabase project |
-| Gemini API 429 error | You've hit the free tier limit (1500/day). Wait or upgrade |
+| OpenRouter API 429 error | You've hit the rate limit or have insufficient credits. Check your OpenRouter account. |
 | CORS errors | Ensure `FRONTEND_URL` in backend `.env` matches your frontend URL |
 | Tables not created | Check `DATABASE_URL` is correct and PostgreSQL is running |
 

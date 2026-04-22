@@ -103,7 +103,7 @@ export default function CreateProposalPage() {
               </span>
             </div>
             <h2 className="text-4xl font-black text-text-primary tracking-tight">Create New Proposal</h2>
-            <p className="section-subtitle mt-2 text-base">Fill in your project details. Gemini AI will generate a complete proposal in seconds.</p>
+            <p className="section-subtitle mt-2 text-base">Fill in your project details. AI will generate a complete proposal in seconds.</p>
           </div>
 
           {/* Error */}

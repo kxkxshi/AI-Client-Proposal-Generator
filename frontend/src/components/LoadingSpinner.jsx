@@ -15,7 +15,7 @@ export default function LoadingSpinner({ message = 'Generating your proposal wit
       {/* Text */}
       <h3 className="text-text-primary font-semibold text-base mb-2">{message}</h3>
       <p className="text-text-muted text-sm mb-6 text-center max-w-xs">
-        Gemini AI is crafting a professional, tailored proposal for your project
+        AI is crafting a professional, tailored proposal for your project
       </p>
 
       {/* Loading dots */}

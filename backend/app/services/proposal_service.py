@@ -3,15 +3,15 @@ from fastapi import HTTPException, status
 from uuid import UUID
 from app.models.proposal import Proposal
 from app.schemas.proposal import ProposalRequest
-from app.services import gemini_service
+from app.services import openrouter_service
 
 
 async def create_proposal(
     db: Session, user_id: str, req: ProposalRequest
 ) -> Proposal:
-    """Generate proposal via Gemini and persist to database."""
+    """Generate proposal via OpenRouter and persist to database."""
     try:
-        generated_content = await gemini_service.generate_proposal(
+        generated_content = await openrouter_service.generate_proposal(
             title=req.title,
             description=req.description,
             features=req.features,

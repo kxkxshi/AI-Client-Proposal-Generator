@@ -22,7 +22,7 @@ async def generate_proposal(
     user_id: str = Depends(get_current_user_id),
 ):
     """
-    Accepts project details, generates a professional proposal via Gemini 1.5 Flash,
+    Accepts project details, generates a professional proposal via OpenRouter,
     saves it to the database, and returns the full proposal.
     """
     proposal = await proposal_service.create_proposal(db, user_id, req)

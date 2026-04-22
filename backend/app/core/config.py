@@ -4,7 +4,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     database_url: str
-    gemini_api_key: str
+    openrouter_api_key: str
     supabase_jwt_secret: str
     supabase_url: str = ""          # e.g. https://xyz.supabase.co
     app_env: str = "development"

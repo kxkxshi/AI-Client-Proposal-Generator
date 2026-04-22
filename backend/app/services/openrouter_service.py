@@ -1,4 +1,3 @@
-import re
 import httpx
 import logging
 from app.core.config import get_settings
@@ -6,22 +5,8 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-GEMINI_BASE = "https://generativelanguage.googleapis.com"
-
-# Ordered preference list — the service tries each until one succeeds.
-# - v1 is the stable channel (supports 1.5-flash)
-# - v1beta supports 2.0 models
-GEMINI_MODELS = [
-    ("v1",    "gemini-1.5-flash"),
-    ("v1",    "gemini-1.5-flash-001"),
-    ("v1",    "gemini-1.5-flash-002"),
-    ("v1",    "gemini-1.5-flash-8b"),
-    ("v1beta","gemini-2.0-flash"),
-    ("v1beta","gemini-2.0-flash-exp"),
-    ("v1beta","gemini-2.0-flash-lite"),
-    ("v1",    "gemini-1.0-pro"),
-]
-
+OPENROUTER_BASE = "https://openrouter.ai/api/v1"
+DEFAULT_MODEL = "openai/gpt-4o-mini"
 
 def build_prompt(
     title: str,
@@ -72,17 +57,6 @@ REQUIRED SECTIONS (use exactly these ## headers):
 
 Generate the full proposal now:"""
 
-
-async def _call_model(api_version: str, model: str, payload: dict) -> httpx.Response:
-    url = f"{GEMINI_BASE}/{api_version}/models/{model}:generateContent"
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        return await client.post(
-            url,
-            params={"key": settings.gemini_api_key},
-            json=payload,
-        )
-
-
 async def generate_proposal(
     title: str,
     description: str,
@@ -92,8 +66,7 @@ async def generate_proposal(
     tone: str,
 ) -> str:
     """
-    Generate a proposal using the first available Gemini model.
-    Tries v1 (stable) models first, then v1beta models as fallback.
+    Generate a proposal using OpenRouter.
     """
     # ─── DEVELOPMENT MOCK MODE ──────────────────────────────────────────────────
     # Instantly returning a high-quality mock response so you can focus on UI
@@ -151,62 +124,44 @@ Best regards,
     prompt = build_prompt(title, description, features, budget, timeline, tone)
 
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "temperature": 0.7,
-            "maxOutputTokens": 4096,
-            "topP": 0.9,
-        },
-        "safetySettings": [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-        ],
+        "model": DEFAULT_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7,
+        "max_tokens": 4096,
+        "top_p": 0.9,
     }
 
-    last_error = "No Gemini model available"
+    headers = {
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": settings.frontend_url,
+        "X-Title": "AI Client Proposal Generator"
+    }
 
-    for api_version, model in GEMINI_MODELS:
-        response = await _call_model(api_version, model, payload)
+    url = f"{OPENROUTER_BASE}/chat/completions"
 
-        # ── Success ───────────────────────────────────────────────────────────
-        if response.status_code == 200:
-            data = response.json()
-            try:
-                content = data["candidates"][0]["content"]["parts"][0]["text"]
-                logger.info(f"Proposal generated using {api_version}/{model}")
-                return content.strip()
-            except (KeyError, IndexError) as e:
-                last_error = f"Unexpected response format from {model}: {e}"
-                continue
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            response = await client.post(url, headers=headers, json=payload)
+        except httpx.RequestError as e:
+            logger.error(f"Network error calling OpenRouter: {e}")
+            raise ValueError("Failed to connect to OpenRouter API. Please check your network.")
 
-        # ── Model not found — try next ─────────────────────────────────────
-        elif response.status_code == 404:
-            logger.warning(f"Model not found: {api_version}/{model}, trying next...")
-            continue
+    if response.status_code == 200:
+        data = response.json()
+        try:
+            content = data["choices"][0]["message"]["content"]
+            logger.info(f"Proposal generated using {DEFAULT_MODEL}")
+            return content.strip()
+        except (KeyError, IndexError) as e:
+            raise ValueError(f"Unexpected response format from OpenRouter: {e}")
 
-        # ── Rate limit ────────────────────────────────────────────────────────
-        elif response.status_code == 429:
-            error_msg = response.json().get("error", {}).get("message", "")
-            # If free tier limit is 0, skip this model entirely
-            if "limit: 0" in error_msg:
-                logger.warning(f"Model {model} requires billing (free tier limit=0), skipping...")
-                continue
-            # Otherwise, surface the rate limit to the user with wait time
-            match = re.search(r"retry in ([\d.]+)s", error_msg, re.IGNORECASE)
-            wait_sec = int(float(match.group(1))) + 1 if match else 60
-            raise ValueError(
-                f"AI rate limit reached. Please wait {wait_sec} seconds and try again. "
-                f"(Free tier: 15 requests/minute)"
-            )
-
-        # ── Other errors ──────────────────────────────────────────────────────
-        else:
-            error_detail = response.json().get("error", {}).get("message", "Unknown error")
-            last_error = f"[{model}] {error_detail}"
-            logger.warning(f"Model {model} error {response.status_code}: {error_detail}")
-            continue
-
-    raise ValueError(
-        f"All Gemini models failed. Last error: {last_error}. "
-        "Please check your API key at https://aistudio.google.com/app/apikey"
-    )
+    elif response.status_code == 429:
+        raise ValueError(
+            "AI rate limit or insufficient credits reached on OpenRouter. "
+            "Please check your account."
+        )
+    else:
+        error_detail = response.json().get("error", {}).get("message", "Unknown error")
+        logger.warning(f"OpenRouter error {response.status_code}: {error_detail}")
+        raise ValueError(f"OpenRouter API error: {error_detail}")

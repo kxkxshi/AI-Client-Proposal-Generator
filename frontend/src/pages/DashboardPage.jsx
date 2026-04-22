@@ -71,7 +71,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2 mb-3">
               <span className="badge-accent">
                 <Sparkles size={10} />
-                Powered by Gemini AI
+                Powered by OpenRouter
               </span>
             </div>
             <h2 className="text-4xl font-black text-text-primary mb-2 tracking-tight">
