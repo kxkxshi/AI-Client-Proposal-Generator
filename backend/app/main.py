@@ -28,11 +28,10 @@ app = FastAPI(
 # ─── CORS ────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ai-client-proposal-generator.vercel.app"],
+    allow_origins=["*"],  # allow all (for now)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origins=["*"]
 )
 
 # ─── Routers ─────────────────────────────────────────────────────────────────
