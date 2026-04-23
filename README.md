@@ -227,7 +227,6 @@ frontend/
 
 * 📄 Export proposal as PDF
 * 📊 Proposal analytics dashboard
-* 💳 Payment integration (Stripe)
 * 📁 Proposal templates
 * 📱 Mobile responsiveness
 
@@ -254,8 +253,7 @@ This project is licensed under the MIT License.
 **Pradeep A V A**
 
 * GitHub: https://github.com/kxkxshi
-* LinkedIn: *(add your link here)*
-
+* LinkedIn: https://www.linkedin.com/in/pradeepava
 ---
 
 ## ⭐ Show your support
