@@ -1,26 +1,35 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
-from app.database import get_db
-from app.core.security import verify_supabase_token
+import httpx
+import os
 
 bearer_scheme = HTTPBearer()
 
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
-def get_current_user(
+
+async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
 ) -> dict:
-    """
-    Extract and validate the Supabase JWT from the Authorization header.
-    Returns the decoded token payload (includes 'sub', 'email', etc.)
-    """
     token = credentials.credentials
-    payload = verify_supabase_token(token)
-    return payload
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "apikey": SUPABASE_ANON_KEY,
+            },
+        )
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    return response.json()
 
 
-def get_current_user_id(
-    payload: dict = Depends(get_current_user),
+async def get_current_user_id(
+    user: dict = Depends(get_current_user),
 ) -> str:
-    """Returns only the user's UUID string (Supabase 'sub' claim)."""
-    return payload["sub"]
+    return user["id"]
